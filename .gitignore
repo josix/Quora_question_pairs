@@ -1,1 +1,4 @@
 result
+default_tokenizer_term_df
+__pycache__/
+test.csv
