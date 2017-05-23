@@ -2,24 +2,20 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
+from scipy.sparse import csr_matrix
 
 from collections import defaultdict
 import math
 
 from Similarity import cosine
 
-def build_trains_question_tfidf():
-    df_train = pd.read_csv("./train.csv")
-    trains_question_list = df_train["question1"].tolist() + df_train["question2"].tolist()
-    #print(len(trains_question_list))
-    index = 0
-    for i in trains_question_list:
-        if i is np.nan:
-            del trains_question_list[index]
-        index += 1
+def build_trains_question_tfidf(dataframe):
+    question_list = dataframe["question1"].tolist() + dataframe["question2"].tolist()
+    print("question_list_length:", len(question_list))
     vectorizer = CountVectorizer()
-    word_count_matrix = vectorizer.fit_transform(trains_question_list)
+    word_count_matrix = vectorizer.fit_transform(question_list)
     #print(word_count_matrix._shape)
+    '''
     word = vectorizer.get_feature_names()
     bool_word_count_matrix = word_count_matrix.astype(bool).astype(int)
     col_sum_matrix = bool_word_count_matrix.sum(axis = 0)
@@ -32,13 +28,12 @@ def build_trains_question_tfidf():
 
     #print(word)
     #print(word_count_matrix.toarray())
+    '''
 
-    # no need to calcultae tfidf of each documents
-    #transformer = TfidfTransformer()
-    #tfidf = transformer.fit_transform(word_count_matrix)
+    transformer = TfidfTransformer()
+    tfidf = transformer.fit_transform(word_count_matrix)
 
-    #print(tfidf.toarray())
-    return word, idf
+    return tfidf.toarray()
 
 def build_test_question_tfidf(question1, question2, corpus_word, idf):
     #print("corpus_word: ", corpus_word)
@@ -72,16 +67,20 @@ def build_test_question_tfidf(question1, question2, corpus_word, idf):
         return None
 
 if __name__ == "__main__":
-    corpus_word, idf = build_trains_question_tfidf()
-    #for i in range(len(corpus_tfidf)):
-        #for j in range(len(corpus_word)):
-            #if corpus_tfidf[i][j] > 0:
-                #print(corpus_word[j], corpus_tfidf[i][j])
-    #print(idf)
-    question1 = "How does the Surface Pro himself 4 compare with iPad Pro?"
-    question2 = "Why did Microsoft choose core m3 and not core i3 home Surface Pro 4?"
-    question_tfidf = build_test_question_tfidf(question1, question2, corpus_word, idf)
-    print(cosine(question_tfidf[0], question_tfidf[1]))
-
-
+    df_train = pd.read_csv("./train.csv")
+    print("test_shape:(ori)", df_train.shape)
+    df_train = df_train.dropna(axis = 0, how = "any")
+    question_total = df_train.shape[0]
+    print("test_shape:(dropped)", df_train.shape)
+    tfidf = build_trains_question_tfidf(df_train)
+    question1_tfidf = tfidf[:question_total]
+    question2_tfidf = tfidf[question_total:]
+    print(question1_tfidf.shape)
+    print(question2_tfidf.T.shape)
+    print(type(question1_tfidf))
+    print(csr_matrix(question1_tfidf).multiply(csr_matrix(question2_tfidf).T))
+    #similarity = defaultdict(int)
+    #for i in range(len(tfidf)-1, question_total-1, -1):
+        #print(i, i-question_total)
+        #similarity[i - question_total] = cosine(tfidf[i], tfidf[i - question_total])
 
