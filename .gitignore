@@ -3,3 +3,7 @@ default_tokenizer_term_df
 __pycache__/
 test.csv
 Similarity.pyc
+*.dat
+report_*
+out.csv
+sample.csv

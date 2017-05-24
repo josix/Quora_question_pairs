@@ -2,12 +2,11 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
-from scipy.sparse import csr_matrix
+from sklearn.metrics.pairwise import cosine_similarity
+#from memory_profiler import profile
 
 from collections import defaultdict
 import math
-
-from Similarity import cosine
 
 def build_trains_question_tfidf(dataframe):
     question_list = dataframe["question1"].tolist() + dataframe["question2"].tolist()
@@ -33,11 +32,12 @@ def build_trains_question_tfidf(dataframe):
     transformer = TfidfTransformer()
     tfidf = transformer.fit_transform(word_count_matrix)
 
-    return tfidf.toarray()
+    return tfidf
+
 
 def build_test_question_tfidf(question1, question2, corpus_word, idf):
     #print("corpus_word: ", corpus_word)
-    if question1 is not None and question2 is not None:
+    if question1 is not "" and question2 is not "":
         test_question_list = [question1 , question2]
         tfidf = []
         for question in test_question_list:
@@ -64,21 +64,32 @@ def build_test_question_tfidf(question1, question2, corpus_word, idf):
         #print(len(tfidf[1]))
         return tfidf
     else:
-        return None
+        return [[1], [1]]
 
 if __name__ == "__main__":
-    df_train = pd.read_csv("./train.csv")
+    df_train = pd.read_csv("./test.csv")
     print("test_shape:(ori)", df_train.shape)
-    df_train = df_train.dropna(axis = 0, how = "any")
+    print( df_train.dtypes)
+    df_train.fillna(value="", inplace = True)
     question_total = df_train.shape[0]
     print("test_shape:(dropped)", df_train.shape)
     tfidf = build_trains_question_tfidf(df_train)
+
+    del df_train
     question1_tfidf = tfidf[:question_total]
     question2_tfidf = tfidf[question_total:]
     print(question1_tfidf.shape)
     print(question2_tfidf.T.shape)
     print(type(question1_tfidf))
-    #print(csr_matrix(question1_tfidf).multiply(csr_matrix(question2_tfidf).T))
-    for i in range(len(question1_tfidf)):
-        print(i, "cosine similarity:", cosine(question1_tfidf[i], question2_tfidf[i]))
+    print(question1_tfidf.dtype)
+    df_output = pd.DataFrame(columns = ["is_duplicate"], dtype=float)
+    for row in range(question1_tfidf.shape[0]):
+        df_output.loc[row] = [cosine_similarity(question1_tfidf[row], question2_tfidf[row])[0][0]]
+        print(row, cosine_similarity(question1_tfidf[row], question2_tfidf[row])[0][0])
+        #print(row, "1:", question1_tfidf[row])
+        #print(row, "2:", question2_tfidf[row])
+    print(df_output.head())
+    df_output.to_csv("out.csv", encoding='utf-8')
 
+    #print(len(similarity))
+    #print(average)
