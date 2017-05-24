@@ -78,9 +78,7 @@ if __name__ == "__main__":
     print(question1_tfidf.shape)
     print(question2_tfidf.T.shape)
     print(type(question1_tfidf))
-    print(csr_matrix(question1_tfidf).multiply(csr_matrix(question2_tfidf).T))
-    #similarity = defaultdict(int)
-    #for i in range(len(tfidf)-1, question_total-1, -1):
-        #print(i, i-question_total)
-        #similarity[i - question_total] = cosine(tfidf[i], tfidf[i - question_total])
+    #print(csr_matrix(question1_tfidf).multiply(csr_matrix(question2_tfidf).T))
+    for i in range(len(question1_tfidf)):
+        print(i, "cosine similarity:", cosine(question1_tfidf[i], question2_tfidf[i]))
 
