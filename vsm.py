@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 #from memory_profiler import profile
 
@@ -14,7 +15,7 @@ def build_trains_question_tfidf(dataframe):
     vectorizer = CountVectorizer()
     word_count_matrix = vectorizer.fit_transform(question_list)
     #print(word_count_matrix._shape)
-    '''
+    ''' use for compute idf dictionary
     word = vectorizer.get_feature_names()
     bool_word_count_matrix = word_count_matrix.astype(bool).astype(int)
     col_sum_matrix = bool_word_count_matrix.sum(axis = 0)
@@ -35,8 +36,11 @@ def build_trains_question_tfidf(dataframe):
     return tfidf
 
 
-def build_test_question_tfidf(question1, question2, corpus_word, idf):
-    #print("corpus_word: ", corpus_word)
+def build_test_question_tfidf(question1, question2, corpus_word = None, idf = None):
+    if corpus_word is None and idf is None:
+        tfidf_vectorizer = TfidfVectorizer()
+        tfidf = tfidf_vectorizer.fit_transform([question1, question2])
+        return tfidf
     if question1 is not "" and question2 is not "":
         test_question_list = [question1 , question2]
         tfidf = []
@@ -44,24 +48,14 @@ def build_test_question_tfidf(question1, question2, corpus_word, idf):
             vectorizer = CountVectorizer()
             question_word_count_matrix = vectorizer.fit_transform([question]).toarray()
             word = vectorizer.get_feature_names()
-            #print(set(word))
-            #print(question_word_count_matrix)
             index = { value:i for i, value in enumerate(word)}
-            #print(index)
             question_tfidf = []
             for term_i in range(len(corpus_word)):
                 if corpus_word[term_i] in set(word):
-                    #print( "in_word:", corpus_word[term_i])
-                    #print(index[corpus_word[term_i]])
-                    #print("question_array:", question_word_count_matrix[0])
-                    #print("first:", * question_word_count_matrix[0][index[corpus_word[term_i]]])
                     question_tfidf.append(idf[corpus_word[term_i]]*question_word_count_matrix[0][index[corpus_word[term_i]]])
                 else:
-                    #print("not_in:", corpus_word[term_i])
                     question_tfidf.append(0)
             tfidf.append(question_tfidf)
-        #print(len(tfidf[0]))
-        #print(len(tfidf[1]))
         return tfidf
     else:
         return [[1], [1]]
@@ -70,26 +64,34 @@ if __name__ == "__main__":
     df_train = pd.read_csv("./test.csv")
     print("test_shape:(ori)", df_train.shape)
     print( df_train.dtypes)
-    df_train.fillna(value="", inplace = True)
-    question_total = df_train.shape[0]
+    df_train.fillna(value="", inplace = True) # fill all nan data
+    question_total = df_train.shape[0] # get length of row
     print("test_shape:(dropped)", df_train.shape)
-    tfidf = build_trains_question_tfidf(df_train)
-
-    del df_train
-    question1_tfidf = tfidf[:question_total]
-    question2_tfidf = tfidf[question_total:]
-    print(question1_tfidf.shape)
-    print(question2_tfidf.T.shape)
-    print(type(question1_tfidf))
-    print(question1_tfidf.dtype)
-    df_output = pd.DataFrame(columns = ["is_duplicate"], dtype=float)
-    for row in range(question1_tfidf.shape[0]):
-        df_output.loc[row] = [cosine_similarity(question1_tfidf[row], question2_tfidf[row])[0][0]]
-        print(row, cosine_similarity(question1_tfidf[row], question2_tfidf[row])[0][0])
-        #print(row, "1:", question1_tfidf[row])
-        #print(row, "2:", question2_tfidf[row])
-    print(df_output.head())
-    df_output.to_csv("out.csv", encoding='utf-8')
+    with open("test_out.csv", "wt") as fout:
+        fout.write("test_id,is_duplicate\n")
+        for index, row in df_train.iterrows():
+            print(index, row["question1"], row["question2"])
+            #print(build_test_question_tfidf(row["question1"], row["question2"]).toarray())
+            vector_1, vector_2 = build_test_question_tfidf(row["question1"], row["question2"])
+            #print(str(index)+","+ str(cosine_similarity(vector_1, vector_2)))
+            fout.write(str(index)+","+ str(cosine_similarity(vector_1, vector_2)[0][0])+"\n")
+#    tfidf = build_trains_question_tfidf(df_train)
+#
+#    del df_train
+#    question1_tfidf = tfidf[:question_total]
+#    question2_tfidf = tfidf[question_total:]
+#    print(question1_tfidf.shape)
+#    print(question2_tfidf.T.shape)
+#    print(type(question1_tfidf))
+#    print(question1_tfidf.dtype)
+#    df_output = pd.DataFrame(columns = ["is_duplicate"], dtype=float)
+#    for row in range(question1_tfidf.shape[0]):
+#        df_output.loc[row] = [cosine_similarity(question1_tfidf[row], question2_tfidf[row])[0][0]]
+#        print(row, cosine_similarity(question1_tfidf[row], question2_tfidf[row])[0][0])
+#        #print(row, "1:", question1_tfidf[row])
+#        #print(row, "2:", question2_tfidf[row])
+#    print(df_output.head())
+#    df_output.to_csv("out.csv", encoding='utf-8')
 
     #print(len(similarity))
     #print(average)
