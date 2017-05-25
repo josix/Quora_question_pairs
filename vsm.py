@@ -70,6 +70,8 @@ if __name__ == "__main__":
     with open("test_out.csv", "wt") as fout:
         fout.write("test_id,is_duplicate\n")
         for index, row in df_train.iterrows():
+            if index == 1346464:
+                fout.write(str(index)+","+ str(1.0))+"\n")
             print(index, row["question1"], row["question2"])
             #print(build_test_question_tfidf(row["question1"], row["question2"]).toarray())
             vector_1, vector_2 = build_test_question_tfidf(row["question1"], row["question2"])
