@@ -9,6 +9,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
 import math
 
+from Preprocessor import Preprocessor
+
 def build_trains_question_tfidf(dataframe):
     question_list = dataframe["question1"].tolist() + dataframe["question2"].tolist()
     print("question_list_length:", len(question_list))
@@ -38,7 +40,7 @@ def build_trains_question_tfidf(dataframe):
 
 def build_test_question_tfidf(question1, question2, corpus_word = None, idf = None):
     if corpus_word is None and idf is None:
-        tfidf_vectorizer = TfidfVectorizer()
+        tfidf_vectorizer = TfidfVectorizer(preprocessor = Preprocessor)
         tfidf = tfidf_vectorizer.fit_transform([question1, question2])
         return tfidf
     if question1 is not "" and question2 is not "":
@@ -64,14 +66,15 @@ if __name__ == "__main__":
     df_train = pd.read_csv("./test.csv")
     print("test_shape:(ori)", df_train.shape)
     print( df_train.dtypes)
-    df_train.fillna(value="", inplace = True) # fill all nan data
+    df_train.fillna(value="empty", inplace = True) # fill all nan data
     question_total = df_train.shape[0] # get length of row
     print("test_shape:(dropped)", df_train.shape)
     with open("test_out.csv", "wt") as fout:
         fout.write("test_id,is_duplicate\n")
         for index, row in df_train.iterrows():
             if index == 1346464:
-                fout.write(str(index)+","+ str(1.0))+"\n")
+                fout.write(str(index)+","+ str(1.0)+"\n")
+                continue
             print(index, row["question1"], row["question2"])
             #print(build_test_question_tfidf(row["question1"], row["question2"]).toarray())
             vector_1, vector_2 = build_test_question_tfidf(row["question1"], row["question2"])
