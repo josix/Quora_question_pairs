@@ -9,3 +9,4 @@ out.csv
 sample.csv
 test*.csv
 score/
+*.pyc
