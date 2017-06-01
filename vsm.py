@@ -24,7 +24,7 @@ def build_question_tfidf_okapi(question1, question2):
     idf = defaultdict(lambda:1)
     total_doc = word_count_matrix.shape[0]
     for term_i in range(col_sum_matrix.shape[1]):
-        idf[word[term_i]] = math.log10(total_doc/col_sum_matrix.item(term_i)) + 1
+        idf[word[term_i]] = math.log10((total_doc+1)/(1+col_sum_matrix.item(term_i))) + 1
         #print(word[term_i],":", col_sum_matrix.item(term_i))
 
     tfidf_matrix = []
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                 continue
             print(index, row["question1"], row["question2"])
             #print(build_test_question_tfidf(row["question1"], row["question2"]).toarray())
-            #vector_1, vector_2 = build_question_tfidf(row["question1"], row["question2"]) # raw tf weighting
-            vector_1, vector_2 = build_question_tfidf_okapi(row["question1"] , row["question2"]) # okapi tf weighting
-            print(str(index)+","+ str(cosine_similarity(vector_1, vector_2)))
+            vector_1, vector_2 = build_question_tfidf(row["question1"], row["question2"]) # raw tf weighting
+            #vector_1, vector_2 = build_question_tfidf_okapi(row["question1"] , row["question2"]) # okapi tf weighting
+            #print(str(index)+","+ str(cosine_similarity(vector_1, vector_2)))
             fout.write(str(index)+","+ str(cosine_similarity(vector_1, vector_2)[0][0])+"\n")
