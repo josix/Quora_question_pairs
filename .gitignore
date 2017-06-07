@@ -13,3 +13,5 @@ score/
 test_*
 train_*
 NaiveBayes/train.csv
+clean_*.csv
+.ipynb_checkpoints/
