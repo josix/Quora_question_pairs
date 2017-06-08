@@ -15,3 +15,5 @@ train_*
 NaiveBayes/train.csv
 clean_*.csv
 .ipynb_checkpoints/
+model/
+data/

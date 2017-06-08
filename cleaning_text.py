@@ -99,8 +99,8 @@ def text_to_wordlist(text, remove_stop_words=True, stem_words=False):
     # Optionally, remove stop words
     if remove_stop_words:
         text = text.split()
-#         text = [w for w in text if not w in stop_words]
-        text = [w for w in text if not w in ['a', 'an', 'the']]
+        text = [w for w in text if not w in stop_words]
+        #text = [w for w in text if not w in ['a', 'an', 'the']]
         text = " ".join(text)
 
     # Optionally, shorten words to their stems
@@ -116,14 +116,14 @@ def text_to_wordlist(text, remove_stop_words=True, stem_words=False):
 def process_questions(question_list, questions, question_list_name, dataframe):
     '''transform questions and display progress'''
     for question in questions:
-        question_list.append(text_to_wordlist(question))
+        question_list.append(text_to_wordlist(question, True, True))
         if len(question_list) % 100000 == 0:
             progress = len(question_list)/len(dataframe) * 100
             print("{} is {}% complete.".format(question_list_name, round(progress, 1)))
 
 #train_question1 = []
 #process_questions(train_question1, train.question1, 'train_question1', train)
-
+#
 #train_question2 = []
 #process_questions(train_question2, train.question2, 'train_question2', train)
 
@@ -139,18 +139,18 @@ process_questions(test_question2, test.question2, 'test_question2', test)
     #print(train_question1[i])
     #print(train_question2[i])
     #print()
-'''
-with open("clean_train.csv", "wt") as fout:
-    fout.write('"id","qid1","qid2","question1","question2","is_duplicate"\n')
-    for i in range(len(train_question1)):
-        #print("%d,%d,%d,\"%s\",\"%s\",%d" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
-        fout.write("%d,%d,%d,\"%s\",\"%s\",%d\n" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
-        if i % 100000 == 0:
-            progress = i/len(train_question1)*100
-            print("{}% written.".format(round(progress, 1)))
-    del train_question1, train_question2
-    '''
-with open("clean_test.csv", "wt") as fout:
+
+#with open("clean_train.csv", "wt") as fout:
+#    fout.write('"id","qid1","qid2","question1","question2","is_duplicate"\n')
+#    for i in range(len(train_question1)):
+#        #print("%d,%d,%d,\"%s\",\"%s\",%d" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
+#        fout.write("%d,%d,%d,\"%s\",\"%s\",%d\n" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
+#        if i % 100000 == 0:
+#            progress = i/len(train_question1)*100
+#            print("{}% written.".format(round(progress, 1)))
+#    del train_question1, train_question2
+
+with open("clean_test_stem.csv", "wt") as fout:
     fout.write('"test_id","question1","question2"\n')
     for i in range(len(test_question1)):
         #print("%d,\"%s\",\"%s\"" % (i, test_question1[i], test_question2[i]))

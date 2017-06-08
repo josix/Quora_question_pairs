@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
 import math
 
-from Preprocessor import Preprocessor
+from Parser import Preprocessor
 
 def build_question_tfidf_okapi(question1, question2):
     doclen = [len(question1),  len(question2)]
