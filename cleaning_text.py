@@ -10,8 +10,8 @@ from nltk.stem import SnowballStemmer
 import re
 from string import punctuation
 
-train = pd.read_csv("./train.csv")[:]
-test = pd.read_csv("./test.csv")[:]
+train = pd.read_csv("./data/train.csv")[:]
+test = pd.read_csv("./data/test.csv")[:]
 
 # Check for any null values
 
@@ -116,22 +116,22 @@ def text_to_wordlist(text, remove_stop_words=True, stem_words=False):
 def process_questions(question_list, questions, question_list_name, dataframe):
     '''transform questions and display progress'''
     for question in questions:
-        question_list.append(text_to_wordlist(question, True, True))
+        question_list.append(text_to_wordlist(question, True, False))
         if len(question_list) % 100000 == 0:
             progress = len(question_list)/len(dataframe) * 100
             print("{} is {}% complete.".format(question_list_name, round(progress, 1)))
 
-#train_question1 = []
-#process_questions(train_question1, train.question1, 'train_question1', train)
+train_question1 = []
+process_questions(train_question1, train.question1, 'train_question1', train)
+
+train_question2 = []
+process_questions(train_question2, train.question2, 'train_question2', train)
+
+#test_question1 = []
+#process_questions(test_question1, test.question1, 'test_question1', test)
 #
-#train_question2 = []
-#process_questions(train_question2, train.question2, 'train_question2', train)
-
-test_question1 = []
-process_questions(test_question1, test.question1, 'test_question1', test)
-
-test_question2 = []
-process_questions(test_question2, test.question2, 'test_question2', test)
+#test_question2 = []
+#process_questions(test_question2, test.question2, 'test_question2', test)
 
 # Preview some transformed pairs of questions
 #a = 0 
@@ -140,21 +140,21 @@ process_questions(test_question2, test.question2, 'test_question2', test)
     #print(train_question2[i])
     #print()
 
-#with open("clean_train.csv", "wt") as fout:
-#    fout.write('"id","qid1","qid2","question1","question2","is_duplicate"\n')
-#    for i in range(len(train_question1)):
-#        #print("%d,%d,%d,\"%s\",\"%s\",%d" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
-#        fout.write("%d,%d,%d,\"%s\",\"%s\",%d\n" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
-#        if i % 100000 == 0:
-#            progress = i/len(train_question1)*100
-#            print("{}% written.".format(round(progress, 1)))
-#    del train_question1, train_question2
-
-with open("clean_test_stem.csv", "wt") as fout:
-    fout.write('"test_id","question1","question2"\n')
-    for i in range(len(test_question1)):
-        #print("%d,\"%s\",\"%s\"" % (i, test_question1[i], test_question2[i]))
-        fout.write("%d,\"%s\",\"%s\"\n" % (i, test_question1[i], test_question2[i]))
+with open("clean_train.csv", "wt") as fout:
+    fout.write('"id","qid1","qid2","question1","question2","is_duplicate"\n')
+    for i in range(len(train_question1)):
+        #print("%d,%d,%d,\"%s\",\"%s\",%d" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
+        fout.write("%d,%d,%d,\"%s\",\"%s\",%d\n" % (i, train.qid1[i], train.qid2[i], train_question1[i], train_question2[i], train.is_duplicate[i]))
         if i % 100000 == 0:
-            progress = i/len(test_question1)*100
+            progress = i/len(train_question1)*100
             print("{}% written.".format(round(progress, 1)))
+    #del train_question1, train_question2
+
+#with open("clean_test.csv", "wt") as fout:
+#    fout.write('"test_id","question1","question2"\n')
+#    for i in range(len(test_question1)):
+#        #print("%d,\"%s\",\"%s\"" % (i, test_question1[i], test_question2[i]))
+#        fout.write("%d,\"%s\",\"%s\"\n" % (i, test_question1[i], test_question2[i]))
+#        if i % 100000 == 0:
+#            progress = i/len(test_question1)*100
+#            print("{}% written.".format(round(progress, 1)))

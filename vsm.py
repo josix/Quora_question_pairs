@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import jellyfish
 #from memory_profiler import profile
 
 from collections import defaultdict
@@ -44,25 +45,33 @@ def build_question_tfidf_okapi(question1, question2):
 
 
 def build_question_tfidf(question1, question2):
-    tfidf_vectorizer = TfidfVectorizer(preprocessor = Preprocessor)
+    tfidf_vectorizer = TfidfVectorizer()
     tfidf = tfidf_vectorizer.fit_transform([question1, question2])
     return tfidf
 
 if __name__ == "__main__":
-    df_train = pd.read_csv("./test.csv")
+    df_train = pd.read_csv("./data/clean_train.csv")
     print("test_shape:(ori)", df_train.shape)
     print( df_train.dtypes)
     df_train.fillna(value="empty", inplace = True) # fill all nan data
     print("test_shape:(dropped)", df_train.shape)
-    with open("test_out.csv", "wt") as fout:
+    error_out = open("value_error_string_train.csv", "wt")
+    with open("train_out_vsm.csv", "wt") as fout:
         fout.write("test_id,is_duplicate\n")
         for index, row in df_train.iterrows():
             if index == 1346464:
                 fout.write(str(index)+","+ str(1.0)+"\n")
                 continue
-            print(index, row["question1"], row["question2"])
+            #print(index, row["question1"], row["question2"])
             #print(build_test_question_tfidf(row["question1"], row["question2"]).toarray())
-            vector_1, vector_2 = build_question_tfidf(row["question1"], row["question2"]) # raw tf weighting
+            try:
+                vector_1, vector_2 = build_question_tfidf(row["question1"], row["question2"]) # raw tf weighting
+            except ValueError:
+                similarity = jellyfish.jaro_winkler(row["question1"], row["question2"])
+                error_out.write(str(index)+","+row["question1"]+","+row["question2"]+","+str(similarity)+"\n")
+                fout.write(str(index)+","+ str(similarity)+"\n")
+                continue
             #vector_1, vector_2 = build_question_tfidf_okapi(row["question1"] , row["question2"]) # okapi tf weighting
             #print(str(index)+","+ str(cosine_similarity(vector_1, vector_2)))
             fout.write(str(index)+","+ str(cosine_similarity(vector_1, vector_2)[0][0])+"\n")
+    error_out.close()

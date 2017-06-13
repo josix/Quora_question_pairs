@@ -24,7 +24,7 @@ def compute_vector(sentence, sentence2):
             continue
         i+=1
 
-    #vector = vector / i
+    vector = vector / i
 
     i = 0
     vector2 = np.zeros((300,))
@@ -35,10 +35,10 @@ def compute_vector(sentence, sentence2):
             vector2 += np.zeros((300,))
             continue
         i += 1
-    #vector2 = vector2 / i
+    vector2 = vector2 / i
     return vector.reshape(1, -1), vector2.reshape(1, -1)
 
-with open("./score/test_out_word2vec_sum.csv", "wt") as fout:
+with open("./score/test_out_word2vec.csv", "wt") as fout:
     fout.write('test_id,is_duplicate\n')
     for i in range(len(sample_sentence_list)):
         sample_sentence = sample_sentence_list[i]
@@ -48,8 +48,8 @@ with open("./score/test_out_word2vec_sum.csv", "wt") as fout:
         #print(sample_sentence2)
         v1, v2 = compute_vector(sample_sentence, sample_sentence2)
         #print(v1, v2)
-        print(i, sample_sentence_list[i])
-        print(i, sample_sentence_list2[i])
+        #print(i, sample_sentence_list[i])
+        #print(i, sample_sentence_list2[i])
         try:
             fout.write(str(i) +','+ str(cosine_similarity(v1, v2)[0][0])+'\n')
         except ValueError:
