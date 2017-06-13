@@ -17,3 +17,4 @@ clean_*.csv
 .ipynb_checkpoints/
 model/
 data/
+.DS_Store
